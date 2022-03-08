@@ -139,6 +139,16 @@ void checkData(Info *imgInfo, string line)
             storeTriangles(imgInfo, words);
         }
     }
+    else if (keyword == "vn"){
+        if (words.size() < 4)
+        {
+            displayError(keyword);
+        }
+        else
+        {
+            storeVertexNormalVectors(imgInfo, words);
+        }
+    }
 }
 
 Info readInfo(string fileName)
@@ -270,14 +280,19 @@ void storeTriangles(Info *imgInfo, vector<string> words)
     try
     {
         Triangle triangle;
-        triangle.p0 = imgInfo->vertices[stoi(words.at(1)) - 1];
-        triangle.p1 = imgInfo->vertices[stoi(words.at(2)) - 1];
-        triangle.p2 = imgInfo->vertices[stoi(words.at(3)) - 1];
+        triangle.v1 = imgInfo->vertices[stoi(words.at(1)) - 1];
+        triangle.v2 = imgInfo->vertices[stoi(words.at(2)) - 1];
+        triangle.v3 = imgInfo->vertices[stoi(words.at(3)) - 1];
         triangle.mtlcolor = imgInfo->mtlcolor;
         imgInfo->triangles.push_back(triangle);
     }
     catch (const std::exception &)
     {
+        // catch exception if the vertices does not exists
         displayError("f");
     }
+}
+
+void storeVertexNormalVectors(Info *imgInfo, vector<string> words){
+    
 }

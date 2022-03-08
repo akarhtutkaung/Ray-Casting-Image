@@ -3,7 +3,7 @@
 Vector3 normalizeVector(Vector3 vec)
 {
     Vector3 normV;
-    float length = sqrt(pow(vec.x, 2) + pow(vec.y, 2) + pow(vec.z, 2));
+    float length = vectorLength(vec);
     if (length == 0)
     {
         return vec;

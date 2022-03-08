@@ -14,7 +14,7 @@ int main(int argc, char **argv)
     int widthPixel = imgInfo.imgSize.width;
     int heightPixel = imgInfo.imgSize.height;
     Vector3 eye = imgInfo.eye;
-    int imgColorData[widthPixel][heightPixel][3];
+    unsigned int imgColorData[widthPixel][heightPixel][3];
 
     // set the background color
     for (int row = 0; row < heightPixel; row++)
@@ -45,30 +45,77 @@ int main(int argc, char **argv)
         {
             Vector3 viewCoor = convertPixelToCoor(imgInfo.viewWindow, imgInfo.imgSize, j, i); // coordinate of the assigned pixel location
             Vector3 rayDir = calRayDir(imgInfo.eye, viewCoor);                                // ray direction of assigned pixel location
-            float distanceEyePlane = calRayDis(imgInfo.eye, viewCoor);                        // distance from eye toassigned pixel location
-            float minDis = distanceEyePlane;
+            float distanceEyePlane = distance(imgInfo.eye, viewCoor);                         // distance from eye to assigned pixel location
+            float minDis = distanceEyePlane, t;
+            char shape = 'z';
+            int index;
 
             for (int k = 0; k < imgInfo.spheres.size(); k++)
             { // check which sphere would displayover others
                 Sphere sphere = imgInfo.spheres.at(k);
-                float sphereDis = calDistanceFromSphere(rayDir, imgInfo.eye, sphere.center, sphere.radius); // distance from eye to sphere if ray intersect the sphere
-                if (minDis >= sphereDis)
+                float tTemp = calTDistanceFromSphere(rayDir, imgInfo.eye, sphere); // distance from eye to sphere if ray intersect the sphere
+                if (tTemp >= 0)
                 {
-                    minDis = sphereDis;
-                    RBG final;
-                    Vector3 rayInterSphere = calRayIntersectSphere(rayDir, imgInfo.eye, sphereDis);
-
-                    final = phongIllu(imgInfo.lights, rayInterSphere, rayDir, imgInfo.spheres, imgInfo.viewDir, k);
-                    imgColorData[i][j][0] = convertColor(final.r);
-                    imgColorData[i][j][1] = convertColor(final.g);
-                    imgColorData[i][j][2] = convertColor(final.b);
+                    float sphereDis = calDistanceFromRayEqu(rayDir, imgInfo.eye, tTemp);
+                    if (minDis >= sphereDis)
+                    {
+                        minDis = sphereDis;
+                        t = tTemp;
+                        index = k;
+                        shape = 's';
+                    }
                 }
+            }
+            for (int k = 0; k < imgInfo.triangles.size(); k++)
+            {
+                Triangle triangle = imgInfo.triangles.at(k);
+                float tTemp = calTDistanceFromTriangle(rayDir, imgInfo.eye, triangle);
+                if (tTemp >= 0)
+                {
+                    Vector3 rayIntersectionPoint = calRayIntersectObjPoint(rayDir, imgInfo.eye, tTemp);
+                    Barycentric barycentricPoint = barycentricCalculation(triangle, rayIntersectionPoint);
+                    // printf("baric: %f, %f, %f\n", barycentricPoint.a, barycentricPoint.b, barycentricPoint.r);
+                    // if (!(barycentricPoint.a > 1 || barycentricPoint.a < 0 || barycentricPoint.b > 1 || barycentricPoint.b < 0 || barycentricPoint.r > 1 || barycentricPoint.r < 0 || barycentricPoint.a + barycentricPoint.b + barycentricPoint.r > 1 || barycentricPoint.a + barycentricPoint.b + barycentricPoint.r < 0))
+                    // {
+                    if (barycentricPoint.a <= 1 && barycentricPoint.a >= 0 && barycentricPoint.b <= 1 && barycentricPoint.b >= 0 && barycentricPoint.r <= 1 && barycentricPoint.r >= 0 && (barycentricPoint.a + barycentricPoint.b + barycentricPoint.r) <= 1.001 && (barycentricPoint.a + barycentricPoint.b + barycentricPoint.r) >= 0)
+                    {
+                        // point is inside the triangle
+                        float triangleDis = calDistanceFromRayEqu(rayDir, imgInfo.eye, tTemp);
+                        if (minDis >= triangleDis)
+                        {
+                            minDis = triangleDis;
+                            t = tTemp;
+                            index = k;
+                            shape = 't';
+                        }
+                    }
+                }
+            }
+            if (shape == 's' || shape == 't')
+            {
+                RBG final;
+                Vector3 rayIntersectionPoint = calRayIntersectObjPoint(rayDir, imgInfo.eye, t);
+                if (shape == 's')
+                {
+                    Sphere sphere = imgInfo.spheres.at(index);
+                    Vector3 surfaceNormal = calSphereSurfaceNormal(rayIntersectionPoint, sphere);
+                    final = phongIllu(imgInfo.lights, imgInfo.spheres, imgInfo.triangles, sphere.mtlcolor, surfaceNormal, rayIntersectionPoint, imgInfo.viewDir, index, 's');
+                }
+                else if (shape == 't')
+                {
+                    Triangle triangle = imgInfo.triangles.at(index);
+                    Vector3 surfaceNormal = calTriangleSurfaceNormal(triangle);
+                    final = phongIllu(imgInfo.lights, imgInfo.spheres, imgInfo.triangles, triangle.mtlcolor, surfaceNormal, rayIntersectionPoint, imgInfo.viewDir, index, 't');
+                }
+                imgColorData[i][j][0] = convertColor(final.r);
+                imgColorData[i][j][1] = convertColor(final.g);
+                imgColorData[i][j][2] = convertColor(final.b);
             }
         }
     }
 
     string argv2 = argv[2];
-    string outputfile = argv2 + ".bmp";
+    string outputfile = argv2 + ".ppm";
     ofstream output_stream(outputfile, ios::out);
     output_stream << "P3\n"
                   << widthPixel << " "
@@ -84,29 +131,53 @@ int main(int argc, char **argv)
     }
     output_stream.close();
 
-    Vector3 a;
-    a.x = 1.0 / 3.0;
-    a.y = 2.0 / 3.0;
-    a.z = 2.0 / 3.0;
-    Vector3 b;
-    b.x = 0;
-    b.y = 0;
-    b.z = 0;
-    Vector3 p1, p2, p0;
-    p1.x = 0;
-    p1.y = 1;
-    p1.z = 0;
-    p2.x = 0;
-    p2.y = 0;
-    p2.z = 1;
-    p0.x = 1;
-    p0.y = 0;
-    p0.z = 0;
-    Triangle c;
-    c.p1 = p1;
-    c.p2 = p2;
-    c.p0 = p0;
-    Vector3 ret = calRayIntersectTriangle(a, b, c);
-    printf("%f, %f, %f\n", ret.x, ret.y, ret.z);
+    // Vector3 rayDir;
+    // rayDir.x = 0;
+    // rayDir.y = 0;
+    // rayDir.z = 1;
+    // Vector3 rayOrigin;
+    // rayOrigin.x = 0;
+    // rayOrigin.y = 0;
+    // rayOrigin.z = 0;
+    // Vector3 p1, p2, p0;
+
+    // p0.x = 1;
+    // p0.y = 5;
+    // p0.z = 5;
+
+    // p1.x = 0;
+    // p1.y = 8;
+    // p1.z = 5;
+
+    // p2.x = -1;
+    // p2.y = 5;
+    // p2.z = 5;
+
+    // Triangle c;
+    // c.v1 = p0;
+    // c.v2 = p1;
+    // c.v3 = p2;
+
+    // Vector3 pointP;
+    // pointP.x = 1.0 / 5.0;
+    // pointP.y = 2.0 / 5.0;
+    // pointP.z = 2.0 / 5.0;
+
+    // float t = calTDistanceFromTriangle(rayDir, rayOrigin, c);
+    // cout << "t: " << t << endl;
+    // Vector3 ret = calRayIntersectObjPoint(rayDir, rayOrigin, t);
+    // printf("%f, %f, %f\n", ret.x, ret.y, ret.z);
+    // Barycentric barycentricPoint = barycentricCalculation(c, ret);
+    // printf("baric: %f, %f, %f\n", barycentricPoint.a, barycentricPoint.b, barycentricPoint.r);
+    // if (!(barycentricPoint.a > 1 || barycentricPoint.a < 0 || barycentricPoint.b > 1 || barycentricPoint.b < 0 || barycentricPoint.r > 1 || barycentricPoint.r < 0 || barycentricPoint.a + barycentricPoint.b + barycentricPoint.r > 1 || barycentricPoint.a + barycentricPoint.b + barycentricPoint.r < 0))
+    // {
+    //     cout << "inside" << endl;
+    // }
+    // else
+    // {
+    //     cout << "outside" << endl;
+    // }
+    // Vector3 surfaceNorm = calTriangleSurfaceNormal(c);
+    // printf("triangle surfaceNormal: %f, %f, %f\n", surfaceNorm.x, surfaceNorm.y, surfaceNorm.z);
     return 0;
 }

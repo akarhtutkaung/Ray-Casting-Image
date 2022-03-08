@@ -11,6 +11,9 @@
 #define DISTANCE 30
 using namespace std;
 
+#include <cstdlib>
+#include <unistd.h>
+
 typedef struct
 {
     float a;
@@ -64,9 +67,9 @@ typedef struct
 
 typedef struct
 {
-    Vector3 p0;
-    Vector3 p1;
-    Vector3 p2;
+    Vector3 v1;
+    Vector3 v2;
+    Vector3 v3;
     MTLcolor mtlcolor;
 } Triangle;
 
@@ -118,15 +121,17 @@ float calAspectRatio(int widthPixel, int heightPixel);
 Vector3 calViewCoordinate(string keyword, Vector3 eye, Vector3 u, Vector3 v, float distance, Vector3 viewDirNorm, float width, float height);
 Vector3 convertPixelToCoor(ViewWindow viewWindow, Size imgSize, int xPixel, int yPixel);
 Vector3 calRayDir(Vector3 eye, Vector3 plane);
-float calRayDis(Vector3 eye, Vector3 plane);
-float calDistanceFromSphere(Vector3 direction, Vector3 currentPos, Vector3 sphereCenter, float radius);
+float calTDistanceFromSphere(Vector3 direction, Vector3 currentPos, Sphere sphere);
 float convertColor(float n);
-Vector3 calN(Vector3 intersect, Sphere sphere);
+Vector3 calSphereSurfaceNormal(Vector3 intersect, Sphere sphere);
+Vector3 calTriangleSurfaceNormal(Triangle triangle);
 Vector3 calLDir(Light light);
 Vector3 calH(Vector3 L, Vector3 viewDir);
-RBG phongIllu(vector<Light> lights, Vector3 intersectCoor, Vector3 rayDir, vector<Sphere> sphere, Vector3 viewDir, int curSphIndex);
-Vector3 calRayIntersectSphere(Vector3 rayDir, Vector3 rayOrigin, float dist);
-Vector3 calRayIntersectTriangle(Vector3 rayDir, Vector3 rayOrigin, Triangle triangle);
+RBG phongIllu(vector<Light> lights, vector<Sphere> spheres, vector<Triangle> triangles, MTLcolor mtlcolor, Vector3 surfaceNormal, Vector3 intersectCoor, Vector3 viewDir, int curIndex, char shape);
+Vector3 calRayIntersectObjPoint(Vector3 rayDir, Vector3 rayOrigin, float t);
+float calDistanceFromRayEqu(Vector3 rayDir, Vector3 rayOrigin, float t);
+float calTDistanceFromTriangle(Vector3 rayDir, Vector3 rayOrigin, Triangle triangle);
+Barycentric barycentricCalculation(Triangle triangle, Vector3 p);
 
 // storeData.cpp
 void checkData(Info *imgInfo, string line);

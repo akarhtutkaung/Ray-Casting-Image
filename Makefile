@@ -2,6 +2,7 @@ CXX=clang++
 CXXFLAGS=-g -std=c++11 -Wall
 
 all: raytracer
+	rm -f *.o
 clean:
 	rm -f *.o *.h.gch raytracer
 test: rayTracing
