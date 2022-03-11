@@ -384,7 +384,7 @@ void storeTriangles(Info *imgInfo, vector<string> words)
                     triangle.vt2 = stoi(finalWords.at(3));
                     triangle.v3 = imgInfo->vertices[stoi(finalWords.at(4)) - 1];
                     triangle.vt3 = stoi(finalWords.at(5));
-                    if (triangle.vt1 > imgInfo->vertexTexture.size() || triangle.vt2 > imgInfo->vertexTexture.size() || triangle.vt3 > imgInfo->vertexTexture.size())
+                    if (triangle.vt1 > imgInfo->vertexTextureCoordinates.size() || triangle.vt2 > imgInfo->vertexTextureCoordinates.size() || triangle.vt3 > imgInfo->vertexTextureCoordinates.size())
                     {
                         displayError("Texture coordinate");
                     }
@@ -422,7 +422,7 @@ void storeTriangles(Info *imgInfo, vector<string> words)
                     triangle.vt3 = stoi(finalWords.at(7));
                     triangle.vn3 = stoi(finalWords.at(8));
                     triangle.smoothShading = true;
-                    if (triangle.vt1 > imgInfo->vertexTexture.size() || triangle.vt2 > imgInfo->vertexTexture.size() || triangle.vt3 > imgInfo->vertexTexture.size())
+                    if (triangle.vt1 > imgInfo->vertexTextureCoordinates.size() || triangle.vt2 > imgInfo->vertexTextureCoordinates.size() || triangle.vt3 > imgInfo->vertexTextureCoordinates.size())
                     {
                         displayError("Texture coordinate");
                     }

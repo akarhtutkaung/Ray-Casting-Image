@@ -316,14 +316,14 @@ RGB calSphereTextureCoordinate(Vector3 surfaceNormal, Texture *texture)
     return texture->textures.at(j).at(i);
 }
 
-RGB calTriangleTextureCoordinate(Triangle triangle, Barycentric baryCentric, Texture *texture, vector <TextureCoordinate> textureCoordinate)
+RGB calTriangleTextureCoordinate(Triangle triangle, Barycentric baryCentric, Texture *texture, vector<TextureCoordinate> textureCoordinate)
 {
     TextureCoordinate res;
     float alpha = baryCentric.a;
     float beta = baryCentric.b;
     float radian = baryCentric.r;
-    res.u = alpha*textureCoordinate.at(triangle.vt1).u + beta*textureCoordinate.at(triangle.vt2).u + radian*textureCoordinate.at(triangle.vt3).u;
-    res.v = alpha*textureCoordinate.at(triangle.vt1).v + beta*textureCoordinate.at(triangle.vt2).v + radian*textureCoordinate.at(triangle.vt3).v;
+    res.u = alpha * textureCoordinate.at(triangle.vt1 - 1).u + beta * textureCoordinate.at(triangle.vt2 - 1).u + radian * textureCoordinate.at(triangle.vt3 - 1).u;
+    res.v = alpha * textureCoordinate.at(triangle.vt1 - 1).v + beta * textureCoordinate.at(triangle.vt2 - 1).v + radian * textureCoordinate.at(triangle.vt3 - 1).v;
     int i = round(res.u * (texture->width - 1));
     int j = round(res.v * (texture->height - 1));
     return texture->textures.at(j).at(i);
