@@ -182,9 +182,9 @@ Vector3 calSphereSurfaceNormal(Vector3 intersect, Sphere *sphere)
     N.x = (intersect.x - sphere->center.x) / sphere->radius;
     N.y = (intersect.y - sphere->center.y) / sphere->radius;
     N.z = (intersect.z - sphere->center.z) / sphere->radius;
-    // N.x = (intersect.x - sphere.center.x);
-    // N.y = (intersect.y - sphere.center.y);
-    // N.z = (intersect.z - sphere.center.z);
+    // N.x = (intersect.x - sphere->center.x);
+    // N.y = (intersect.y - sphere->center.y);
+    // N.z = (intersect.z - sphere->center.z);
     // cout << "z: " << intersect.z<< endl;
     return normalizeVector(N);
 }
@@ -324,8 +324,8 @@ RGB calTriangleTextureCoordinate(Triangle triangle, Barycentric baryCentric, Tex
     float radian = baryCentric.r;
     res.u = alpha * textureCoordinate.at(triangle.vt1 - 1).u + beta * textureCoordinate.at(triangle.vt2 - 1).u + radian * textureCoordinate.at(triangle.vt3 - 1).u;
     res.v = alpha * textureCoordinate.at(triangle.vt1 - 1).v + beta * textureCoordinate.at(triangle.vt2 - 1).v + radian * textureCoordinate.at(triangle.vt3 - 1).v;
-    int i = round(res.u * (texture->width - 1));
-    int j = round(res.v * (texture->height - 1));
+    int i = round(res.u * float(texture->width - 1));
+    int j = round(res.v * float(texture->height - 1));
     return texture->textures.at(j).at(i);
 }
 
@@ -336,7 +336,7 @@ RGB phongIllu(vector<Light> lights, vector<Sphere *> spheres, vector<Triangle> t
     sum.r = 0.0f;
     sum.b = 0.0f;
     sum.g = 0.0f;
-    float I = 1.0f / (float)lights.size();
+    // float I = 1.0f / (float)lights.size();
     float lightPosDis = INFINITY;
     for (int i = 0; i < lights.size(); i++)
     {
@@ -363,13 +363,16 @@ RGB phongIllu(vector<Light> lights, vector<Sphere *> spheres, vector<Triangle> t
         diffuse.g = (mtlcolor.diffuse * objDif.g * max((float)0, dotProduct(surfaceNormal, L)));
         diffuse.b = (mtlcolor.diffuse * objDif.b * max((float)0, dotProduct(surfaceNormal, L)));
 
-        specular.r = I * lights.at(i).color.r * (mtlcolor.specular * mtlcolor.specHighlight.r * pow(max((float)0, dotProduct(surfaceNormal, H)), mtlcolor.specExp));
-        specular.g = I * lights.at(i).color.g * (mtlcolor.specular * mtlcolor.specHighlight.g * pow(max((float)0, dotProduct(surfaceNormal, H)), mtlcolor.specExp));
-        specular.b = I * lights.at(i).color.b * (mtlcolor.specular * mtlcolor.specHighlight.b * pow(max((float)0, dotProduct(surfaceNormal, H)), mtlcolor.specExp));
+        specular.r = lights.at(i).color.r * (mtlcolor.specular * mtlcolor.specHighlight.r * pow(max((float)0, dotProduct(surfaceNormal, H)), mtlcolor.specExp));
+        specular.g = lights.at(i).color.g * (mtlcolor.specular * mtlcolor.specHighlight.g * pow(max((float)0, dotProduct(surfaceNormal, H)), mtlcolor.specExp));
+        specular.b = lights.at(i).color.b * (mtlcolor.specular * mtlcolor.specHighlight.b * pow(max((float)0, dotProduct(surfaceNormal, H)), mtlcolor.specExp));
 
         sum.r += shadow * (diffuse.r + specular.r);
         sum.g += shadow * (diffuse.g + specular.g);
         sum.b += shadow * (diffuse.b + specular.b);
+        // sum.r += specular.r;
+        // sum.g += specular.g;
+        // sum.b += specular.b;
     }
     // return sum;
     RGB ret;

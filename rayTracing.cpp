@@ -206,54 +206,5 @@ int main(int argc, char **argv)
         }
     }
     output_stream.close();
-
-    // Vector3 rayDir;
-    // rayDir.x = 0;
-    // rayDir.y = 0;
-    // rayDir.z = 1;
-    // Vector3 rayOrigin;
-    // rayOrigin.x = 0;
-    // rayOrigin.y = 0;
-    // rayOrigin.z = 0;
-    // Vector3 p1, p2, p0;
-
-    // p0.x = 1;
-    // p0.y = 5;
-    // p0.z = 5;
-
-    // p1.x = 0;
-    // p1.y = 8;
-    // p1.z = 5;
-
-    // p2.x = -1;
-    // p2.y = 5;
-    // p2.z = 5;
-
-    // Triangle c;
-    // c.v1 = p0;
-    // c.v2 = p1;
-    // c.v3 = p2;
-
-    // Vector3 pointP;
-    // pointP.x = 1.0 / 5.0;
-    // pointP.y = 2.0 / 5.0;
-    // pointP.z = 2.0 / 5.0;
-
-    // float t = calTDistanceFromTriangle(rayDir, rayOrigin, c);
-    // cout << "t: " << t << endl;
-    // Vector3 ret = calRayIntersectObjPoint(rayDir, rayOrigin, t);
-    // printf("%f, %f, %f\n", ret.x, ret.y, ret.z);
-    // Barycentric barycentricPoint = barycentricCalculation(c, ret);
-    // printf("baric: %f, %f, %f\n", barycentricPoint.a, barycentricPoint.b, barycentricPoint.r);
-    // if (!(barycentricPoint.a > 1 || barycentricPoint.a < 0 || barycentricPoint.b > 1 || barycentricPoint.b < 0 || barycentricPoint.r > 1 || barycentricPoint.r < 0 || barycentricPoint.a + barycentricPoint.b + barycentricPoint.r > 1 || barycentricPoint.a + barycentricPoint.b + barycentricPoint.r < 0))
-    // {
-    //     cout << "inside" << endl;
-    // }
-    // else
-    // {
-    //     cout << "outside" << endl;
-    // }
-    // Vector3 surfaceNorm = calTriangleSurfaceNormal(c);
-    // printf("triangle surfaceNormal: %f, %f, %f\n", surfaceNorm.x, surfaceNorm.y, surfaceNorm.z);
     return 0;
 }
