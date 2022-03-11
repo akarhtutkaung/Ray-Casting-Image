@@ -39,10 +39,54 @@ int main(int argc, char **argv)
     imgInfo.viewWindow.ll = calViewCoordinate("ll", eye, u, v, DISTANCE, n, width, height);
     imgInfo.viewWindow.lr = calViewCoordinate("lr", eye, u, v, DISTANCE, n, width, height);
 
+    // Calculate all the triangle's surface normal
+    // bool smoothShading = false;
+    // for (int i = 0; i < imgInfo.triangles.size(); i++)
+    // {
+    //     if (imgInfo.triangles.at(i).smoothShading)
+    //     {
+    //         smoothShading = true;
+    //     }
+    //     imgInfo.triangles.at(i).surfaceNormal = calTriangleSurfaceNormal(imgInfo.triangles.at(i));
+    // }
+    // if (smoothShading)
+    // {
+    //     int currentIndex = 0;
+    //     if (imgInfo.vertexNormals.size() != 0) // Check if the verticies surface normal were provided
+    //     {
+    //         currentIndex = imgInfo.vertexNormals.size() - 1;
+    //     }
+    //     if (currentIndex != imgInfo.vertices.size() - 1) // Calculate the verticies surface normal if all were not provided
+    //     {
+    //         for (; currentIndex < imgInfo.vertices.size(); currentIndex++)
+    //         {
+    //             int totalTriangles = 0;
+    //             float x = 0, y = 0, z = 0;
+    //             for (int j = 0; j < imgInfo.triangles.size(); j++)
+    //             {
+    //                 Triangle triangle = imgInfo.triangles.at(j);
+    //                 if (triangle.v1Index == currentIndex || triangle.v2Index == currentIndex || triangle.v3Index == currentIndex)
+    //                 {
+    //                     x += triangle.surfaceNormal.x;
+    //                     y += triangle.surfaceNormal.y;
+    //                     z += triangle.surfaceNormal.z;
+    //                     totalTriangles++;
+    //                 }
+    //             }
+    //             Vector3 vertexNormal;
+    //             vertexNormal.x = x / float(totalTriangles);
+    //             vertexNormal.y = y / float(totalTriangles);
+    //             vertexNormal.z = z / float(totalTriangles);
+    //             imgInfo.vertexNormals.push_back(vertexNormal);
+    //         }
+    //     }
+    // }
+
     for (int i = 0; i < heightPixel; i++)
     {
         for (int j = 0; j < widthPixel; j++)
         {
+            Barycentric barycentricPoint;
             Vector3 viewCoor = convertPixelToCoor(imgInfo.viewWindow, imgInfo.imgSize, j, i); // coordinate of the assigned pixel location
             Vector3 rayDir = calRayDir(imgInfo.eye, viewCoor);                                // ray direction of assigned pixel location
             float distanceEyePlane = distance(imgInfo.eye, viewCoor);                         // distance from eye to assigned pixel location
@@ -52,7 +96,7 @@ int main(int argc, char **argv)
 
             for (int k = 0; k < imgInfo.spheres.size(); k++)
             { // check which sphere would displayover others
-                Sphere sphere = imgInfo.spheres.at(k);
+                Sphere *sphere = imgInfo.spheres.at(k);
                 float tTemp = calTDistanceFromSphere(rayDir, imgInfo.eye, sphere); // distance from eye to sphere if ray intersect the sphere
                 if (tTemp >= 0)
                 {
@@ -73,10 +117,7 @@ int main(int argc, char **argv)
                 if (tTemp >= 0)
                 {
                     Vector3 rayIntersectionPoint = calRayIntersectObjPoint(rayDir, imgInfo.eye, tTemp);
-                    Barycentric barycentricPoint = barycentricCalculation(triangle, rayIntersectionPoint);
-                    // printf("baric: %f, %f, %f\n", barycentricPoint.a, barycentricPoint.b, barycentricPoint.r);
-                    // if (!(barycentricPoint.a > 1 || barycentricPoint.a < 0 || barycentricPoint.b > 1 || barycentricPoint.b < 0 || barycentricPoint.r > 1 || barycentricPoint.r < 0 || barycentricPoint.a + barycentricPoint.b + barycentricPoint.r > 1 || barycentricPoint.a + barycentricPoint.b + barycentricPoint.r < 0))
-                    // {
+                    barycentricPoint = barycentricCalculation(triangle, rayIntersectionPoint);
                     if (barycentricPoint.a <= 1 && barycentricPoint.a >= 0 && barycentricPoint.b <= 1 && barycentricPoint.b >= 0 && barycentricPoint.r <= 1 && barycentricPoint.r >= 0 && (barycentricPoint.a + barycentricPoint.b + barycentricPoint.r) <= 1.001 && (barycentricPoint.a + barycentricPoint.b + barycentricPoint.r) >= 0)
                     {
                         // point is inside the triangle
@@ -91,21 +132,56 @@ int main(int argc, char **argv)
                     }
                 }
             }
+
             if (shape == 's' || shape == 't')
             {
-                RBG final;
+                RGB final;
                 Vector3 rayIntersectionPoint = calRayIntersectObjPoint(rayDir, imgInfo.eye, t);
                 if (shape == 's')
                 {
-                    Sphere sphere = imgInfo.spheres.at(index);
+                    Sphere *sphere = imgInfo.spheres.at(index);
                     Vector3 surfaceNormal = calSphereSurfaceNormal(rayIntersectionPoint, sphere);
-                    final = phongIllu(imgInfo.lights, imgInfo.spheres, imgInfo.triangles, sphere.mtlcolor, surfaceNormal, rayIntersectionPoint, imgInfo.viewDir, index, 's');
+                    RGB objDif;
+                    if (sphere->textureApplied)
+                    {
+                        RGB originalFormat = calSphereTextureCoordinate(surfaceNormal, sphere->texture);
+                        objDif.r = originalFormat.r / 255.0;
+                        objDif.g = originalFormat.g / 255.0;
+                        objDif.b = originalFormat.b / 255.0;
+                    }
+                    else
+                    {
+                        objDif = sphere->mtlcolor.objDif;
+                    }
+                    final = phongIllu(imgInfo.lights, imgInfo.spheres, imgInfo.triangles, sphere->mtlcolor, sphere->texture, surfaceNormal, rayIntersectionPoint, imgInfo.viewDir, index, 's', objDif);
                 }
                 else if (shape == 't')
                 {
                     Triangle triangle = imgInfo.triangles.at(index);
-                    Vector3 surfaceNormal = calTriangleSurfaceNormal(triangle);
-                    final = phongIllu(imgInfo.lights, imgInfo.spheres, imgInfo.triangles, triangle.mtlcolor, surfaceNormal, rayIntersectionPoint, imgInfo.viewDir, index, 't');
+                    Vector3 surfaceNormal;
+                    if (triangle.smoothShading)
+                    {
+                        surfaceNormal = calTriangleSurfaceNormalSmooth(imgInfo.vertexNormals, triangle, barycentricPoint);
+                    }
+                    else
+                    {
+                        surfaceNormal = calTriangleSurfaceNormal(triangle);
+                    }
+
+                    RGB objDif;
+                    if (triangle.textureApplied)
+                    {
+                        RGB originalFormat = calTriangleTextureCoordinate(triangle, barycentricPoint, triangle.texture, imgInfo.vertexTextureCoordinates);
+                        objDif.r = originalFormat.r / 255.0;
+                        objDif.g = originalFormat.g / 255.0;
+                        objDif.b = originalFormat.b / 255.0;
+                    }
+                    else
+                    {
+                        objDif = triangle.mtlcolor.objDif;
+                    }
+
+                    final = phongIllu(imgInfo.lights, imgInfo.spheres, imgInfo.triangles, triangle.mtlcolor, triangle.texture, surfaceNormal, rayIntersectionPoint, imgInfo.viewDir, index, 't', objDif);
                 }
                 imgColorData[i][j][0] = convertColor(final.r);
                 imgColorData[i][j][1] = convertColor(final.g);

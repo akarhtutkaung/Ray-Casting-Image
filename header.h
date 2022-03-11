@@ -7,12 +7,10 @@
 #include <math.h>
 #include <cmath>
 #include <algorithm>
+#include <sstream>
 #define PI 3.14159265
 #define DISTANCE 30
 using namespace std;
-
-#include <cstdlib>
-#include <unistd.h>
 
 typedef struct
 {
@@ -46,12 +44,12 @@ typedef struct
     float r;
     float b;
     float g;
-} RBG;
+} RGB;
 
 typedef struct
 {
-    RBG objDif;
-    RBG specHighlight;
+    RGB objDif;
+    RGB specHighlight;
     float ambient;
     float diffuse;
     float specular;
@@ -60,9 +58,19 @@ typedef struct
 
 typedef struct
 {
+    int height;
+    int width;
+    // vector<RGB> textures;
+    vector<vector<RGB>> textures;
+} Texture;
+
+typedef struct
+{
     Vector3 center;
     float radius;
     MTLcolor mtlcolor;
+    Texture *texture;
+    bool textureApplied = false;
 } Sphere;
 
 typedef struct
@@ -70,7 +78,18 @@ typedef struct
     Vector3 v1;
     Vector3 v2;
     Vector3 v3;
+    int vn1;
+    int vn2;
+    int vn3;
+    int vt1;
+    int vt2;
+    int vt3;
     MTLcolor mtlcolor;
+    Vector3 surfaceNormal;
+    bool smoothShading = false;
+    Texture *texture;
+    bool textureApplied = false;
+    Barycentric baryCentricPoint;
 } Triangle;
 
 typedef struct
@@ -84,10 +103,15 @@ typedef struct
 typedef struct
 {
     Vector3 vec;
-    RBG color;
+    RGB color;
     float choice; // 0 for point light source, 1 for directional light source
     Vector3 calculatedVec;
 } Light;
+
+typedef struct{
+    float u;
+    float v;
+} TextureCoordinate;
 
 typedef struct
 {
@@ -96,13 +120,17 @@ typedef struct
     Vector3 upDir;     // 'up' direction
     float vFov;        // vertical field of view (degrees)
     Size imgSize;      // size of output image (pixel)
-    RBG bkgcolor;      // background color
+    RGB bkgcolor;      // background color
     MTLcolor mtlcolor; // material color
-    vector<Sphere> spheres;
+    vector<Sphere*> spheres;
     vector<Vector3> vertices;
+    vector<Vector3> vertexNormals;
+    vector<TextureCoordinate> vertexTextureCoordinates;
     vector<Triangle> triangles;
     ViewWindow viewWindow;
     vector<Light> lights;
+    Texture *texture;
+    bool textureApplied = false;
 } Info;
 
 // Vector3.cpp
@@ -121,17 +149,20 @@ float calAspectRatio(int widthPixel, int heightPixel);
 Vector3 calViewCoordinate(string keyword, Vector3 eye, Vector3 u, Vector3 v, float distance, Vector3 viewDirNorm, float width, float height);
 Vector3 convertPixelToCoor(ViewWindow viewWindow, Size imgSize, int xPixel, int yPixel);
 Vector3 calRayDir(Vector3 eye, Vector3 plane);
-float calTDistanceFromSphere(Vector3 direction, Vector3 currentPos, Sphere sphere);
+float calTDistanceFromSphere(Vector3 direction, Vector3 currentPos, Sphere *sphere);
 float convertColor(float n);
-Vector3 calSphereSurfaceNormal(Vector3 intersect, Sphere sphere);
+Vector3 calSphereSurfaceNormal(Vector3 intersect, Sphere *sphere);
 Vector3 calTriangleSurfaceNormal(Triangle triangle);
 Vector3 calLDir(Light light);
 Vector3 calH(Vector3 L, Vector3 viewDir);
-RBG phongIllu(vector<Light> lights, vector<Sphere> spheres, vector<Triangle> triangles, MTLcolor mtlcolor, Vector3 surfaceNormal, Vector3 intersectCoor, Vector3 viewDir, int curIndex, char shape);
+RGB phongIllu(vector<Light> lights, vector<Sphere*> spheres, vector<Triangle> triangles, MTLcolor mtlcolor, Texture *texture, Vector3 surfaceNormal, Vector3 intersectCoor, Vector3 viewDir, int curIndex, char shape, RGB objDif);
 Vector3 calRayIntersectObjPoint(Vector3 rayDir, Vector3 rayOrigin, float t);
 float calDistanceFromRayEqu(Vector3 rayDir, Vector3 rayOrigin, float t);
 float calTDistanceFromTriangle(Vector3 rayDir, Vector3 rayOrigin, Triangle triangle);
 Barycentric barycentricCalculation(Triangle triangle, Vector3 p);
+Vector3 calTriangleSurfaceNormalSmooth(vector<Vector3> vertexNormals, Triangle triangle, Barycentric barycentricPoint);
+RGB calSphereTextureCoordinate(Vector3 surfaceNormal, Texture *texture);
+RGB calTriangleTextureCoordinate(Triangle triangle, Barycentric baryCentric, Texture *texture, vector <TextureCoordinate> textureCoordinate);
 
 // storeData.cpp
 void checkData(Info *imgInfo, string line);
@@ -147,3 +178,6 @@ void storeSphere(Info *imgInfo, vector<string> words);
 void storeLight(Info *imgInfo, vector<string> words);
 void storeVertex(Info *imgInfo, vector<string> words);
 void storeTriangles(Info *imgInfo, vector<string> words);
+void storeVertexNormalVectors(Info *imgInfo, vector<string> words);
+void storeTextureImage(Info *imgInfo, vector<string> words);
+void storeTextureCoordinates(Info *imgInfo, vector<string> words);
