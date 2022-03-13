@@ -327,9 +327,9 @@ void storeTriangles(Info *imgInfo, vector<string> words)
                         finalWords.push_back(words.at(i));
                     }
                 }
-                // triangle.v1Index = stoi(finalWords.at(0)) - 1;
-                // triangle.v2Index = stoi(finalWords.at(2)) - 1;
-                // triangle.v3Index = stoi(finalWords.at(4)) - 1;
+        // triangle.v1Index = stoi(finalWords.at(0)) - 1;
+        // triangle.v2Index = stoi(finalWords.at(2)) - 1;
+        // triangle.v3Index = stoi(finalWords.at(4)) - 1;
                 triangle.v1 = imgInfo->vertices[stoi(finalWords.at(0)) - 1];
                 triangle.vn1 = stoi(finalWords.at(1));
                 triangle.v2 = imgInfo->vertices[stoi(finalWords.at(2)) - 1];
@@ -384,6 +384,10 @@ void storeTriangles(Info *imgInfo, vector<string> words)
                     triangle.vt2 = stoi(finalWords.at(3));
                     triangle.v3 = imgInfo->vertices[stoi(finalWords.at(4)) - 1];
                     triangle.vt3 = stoi(finalWords.at(5));
+
+        // triangle.v1Index = stoi(finalWords.at(0)) - 1;
+        // triangle.v2Index = stoi(finalWords.at(2)) - 1;
+        // triangle.v3Index = stoi(finalWords.at(4)) - 1;
                     if (triangle.vt1 > imgInfo->vertexTextureCoordinates.size() || triangle.vt2 > imgInfo->vertexTextureCoordinates.size() || triangle.vt3 > imgInfo->vertexTextureCoordinates.size())
                     {
                         displayError("Texture coordinate");
@@ -421,6 +425,9 @@ void storeTriangles(Info *imgInfo, vector<string> words)
                     triangle.v3 = imgInfo->vertices[stoi(finalWords.at(6)) - 1];
                     triangle.vt3 = stoi(finalWords.at(7));
                     triangle.vn3 = stoi(finalWords.at(8));
+        // triangle.v1Index = stoi(finalWords.at(0)) - 1;
+        // triangle.v2Index = stoi(finalWords.at(3)) - 1;
+        // triangle.v3Index = stoi(finalWords.at(6)) - 1;
                     triangle.smoothShading = true;
                     if (triangle.vt1 > imgInfo->vertexTextureCoordinates.size() || triangle.vt2 > imgInfo->vertexTextureCoordinates.size() || triangle.vt3 > imgInfo->vertexTextureCoordinates.size())
                     {
@@ -438,10 +445,14 @@ void storeTriangles(Info *imgInfo, vector<string> words)
             }
         }
         else
-        {
+        {   
             triangle.v1 = imgInfo->vertices[stoi(words.at(1)) - 1];
             triangle.v2 = imgInfo->vertices[stoi(words.at(2)) - 1];
             triangle.v3 = imgInfo->vertices[stoi(words.at(3)) - 1];
+            // triangle.v1Index = stoi(words.at(1)) - 1;
+            // triangle.v2Index = stoi(words.at(2)) - 1;
+            // triangle.v3Index = stoi(words.at(3)) - 1;
+            
         }
         triangle.mtlcolor = imgInfo->mtlcolor;
         if (imgInfo->textureApplied)

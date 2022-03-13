@@ -78,6 +78,7 @@ typedef struct
     Vector3 v1;
     Vector3 v2;
     Vector3 v3;
+    int v1Index; int v2Index; int v3Index;
     int vn1;
     int vn2;
     int vn3;

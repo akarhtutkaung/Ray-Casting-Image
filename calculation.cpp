@@ -356,7 +356,7 @@ RGB phongIllu(vector<Light> lights, vector<Sphere *> spheres, vector<Triangle> t
         // calculate shadow
         // send out ray from current surface toward the light
         float shadow = checkShadow(spheres, triangles, L, lightPosDis, intersectCoor, curIndex, shape);
-        // float shadow = 0.0;
+        
         RGB diffuse, specular;
 
         diffuse.r = (mtlcolor.diffuse * objDif.r * max((float)0, dotProduct(surfaceNormal, L)));
@@ -373,6 +373,9 @@ RGB phongIllu(vector<Light> lights, vector<Sphere *> spheres, vector<Triangle> t
         // sum.r += specular.r;
         // sum.g += specular.g;
         // sum.b += specular.b;
+        // sum.r += diffuse.r;
+        // sum.g += diffuse.g;
+        // sum.b += diffuse.b;
     }
     // return sum;
     RGB ret;
@@ -479,8 +482,11 @@ Vector3 calTriangleSurfaceNormalSmooth(vector<Vector3> vertexNormals, Triangle t
     float alpha = barycentricPoint.a;
     float beta = barycentricPoint.b;
     float radian = barycentricPoint.r;
-    ret.x = (alpha * vertexNormals.at(triangle.vn1 - 1).x) + (beta * vertexNormals.at(triangle.vn1 - 1).x) + (radian * vertexNormals.at(triangle.vn1 - 1).x);
-    ret.y = (alpha * vertexNormals.at(triangle.vn2 - 1).y) + (beta * vertexNormals.at(triangle.vn2 - 1).y) + (radian * vertexNormals.at(triangle.vn2 - 1).y);
-    ret.z = (alpha * vertexNormals.at(triangle.vn3 - 1).z) + (beta * vertexNormals.at(triangle.vn3 - 1).z) + (radian * vertexNormals.at(triangle.vn3 - 1).z);
-    return normalizeVector(ret);
+    ret.x = (alpha * vertexNormals.at(triangle.vn1 - 1).x) + (beta * vertexNormals.at(triangle.vn2 - 1).x) + (radian * vertexNormals.at(triangle.vn3 - 1).x);
+    ret.y = (alpha * vertexNormals.at(triangle.vn1 - 1).y) + (beta * vertexNormals.at(triangle.vn2 - 1).y) + (radian * vertexNormals.at(triangle.vn3 - 1).y);
+    ret.z = (alpha * vertexNormals.at(triangle.vn1 - 1).z) + (beta * vertexNormals.at(triangle.vn2 - 1).z) + (radian * vertexNormals.at(triangle.vn3 - 1).z);
+    return normalizeVector(ret); 
 }
+
+
+

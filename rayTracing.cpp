@@ -39,48 +39,33 @@ int main(int argc, char **argv)
     imgInfo.viewWindow.ll = calViewCoordinate("ll", eye, u, v, DISTANCE, n, width, height);
     imgInfo.viewWindow.lr = calViewCoordinate("lr", eye, u, v, DISTANCE, n, width, height);
 
-    // Calculate all the triangle's surface normal
-    // bool smoothShading = false;
+    // // Calculate all the triangle's surface normal
     // for (int i = 0; i < imgInfo.triangles.size(); i++)
     // {
-    //     if (imgInfo.triangles.at(i).smoothShading)
-    //     {
-    //         smoothShading = true;
-    //     }
     //     imgInfo.triangles.at(i).surfaceNormal = calTriangleSurfaceNormal(imgInfo.triangles.at(i));
     // }
-    // if (smoothShading)
+    // for (int currentIndex = 0; currentIndex < imgInfo.vertices.size(); currentIndex++)
     // {
-    //     int currentIndex = 0;
-    //     if (imgInfo.vertexNormals.size() != 0) // Check if the verticies surface normal were provided
+    //     int totalTriangles = 0;
+    //     float x = 0, y = 0, z = 0;
+    //     for (int j = 0; j < imgInfo.triangles.size(); j++)
     //     {
-    //         currentIndex = imgInfo.vertexNormals.size() - 1;
-    //     }
-    //     if (currentIndex != imgInfo.vertices.size() - 1) // Calculate the verticies surface normal if all were not provided
-    //     {
-    //         for (; currentIndex < imgInfo.vertices.size(); currentIndex++)
+    //         Triangle triangle = imgInfo.triangles.at(j);
+    //         if (triangle.v1Index == currentIndex || triangle.v2Index == currentIndex || triangle.v3Index == currentIndex)
     //         {
-    //             int totalTriangles = 0;
-    //             float x = 0, y = 0, z = 0;
-    //             for (int j = 0; j < imgInfo.triangles.size(); j++)
-    //             {
-    //                 Triangle triangle = imgInfo.triangles.at(j);
-    //                 if (triangle.v1Index == currentIndex || triangle.v2Index == currentIndex || triangle.v3Index == currentIndex)
-    //                 {
-    //                     x += triangle.surfaceNormal.x;
-    //                     y += triangle.surfaceNormal.y;
-    //                     z += triangle.surfaceNormal.z;
-    //                     totalTriangles++;
-    //                 }
-    //             }
-    //             Vector3 vertexNormal;
-    //             vertexNormal.x = x / float(totalTriangles);
-    //             vertexNormal.y = y / float(totalTriangles);
-    //             vertexNormal.z = z / float(totalTriangles);
-    //             imgInfo.vertexNormals.push_back(vertexNormal);
+    //             x += triangle.surfaceNormal.x;
+    //             y += triangle.surfaceNormal.y;
+    //             z += triangle.surfaceNormal.z;
+    //             totalTriangles++;
     //         }
     //     }
+    //     Vector3 vertexNormal;
+    //     vertexNormal.x = x / float(totalTriangles);
+    //     vertexNormal.y = y / float(totalTriangles);
+    //     vertexNormal.z = z / float(totalTriangles);
+    //     printf("vertex [%d] Normal: %.15f, %.15f, %.15f\n", currentIndex+1, vertexNormal.x, vertexNormal.y, vertexNormal.z);
     // }
+    
 
     for (int i = 0; i < heightPixel; i++)
     {
@@ -162,6 +147,7 @@ int main(int argc, char **argv)
                     if (triangle.smoothShading)
                     {
                         surfaceNormal = calTriangleSurfaceNormalSmooth(imgInfo.vertexNormals, triangle, barycentricPoint);
+                        
                     }
                     else
                     {
