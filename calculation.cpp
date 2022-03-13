@@ -336,7 +336,7 @@ RGB phongIllu(vector<Light> lights, vector<Sphere *> spheres, vector<Triangle> t
     sum.r = 0.0f;
     sum.b = 0.0f;
     sum.g = 0.0f;
-    // float I = 1.0f / (float)lights.size();
+    float I = 1.0f / (float)lights.size();
     float lightPosDis = INFINITY;
     for (int i = 0; i < lights.size(); i++)
     {
@@ -356,16 +356,16 @@ RGB phongIllu(vector<Light> lights, vector<Sphere *> spheres, vector<Triangle> t
         // calculate shadow
         // send out ray from current surface toward the light
         float shadow = checkShadow(spheres, triangles, L, lightPosDis, intersectCoor, curIndex, shape);
-        
+        // float shadow = 1.0;
         RGB diffuse, specular;
 
         diffuse.r = (mtlcolor.diffuse * objDif.r * max((float)0, dotProduct(surfaceNormal, L)));
         diffuse.g = (mtlcolor.diffuse * objDif.g * max((float)0, dotProduct(surfaceNormal, L)));
         diffuse.b = (mtlcolor.diffuse * objDif.b * max((float)0, dotProduct(surfaceNormal, L)));
 
-        specular.r = lights.at(i).color.r * (mtlcolor.specular * mtlcolor.specHighlight.r * pow(max((float)0, dotProduct(surfaceNormal, H)), mtlcolor.specExp));
-        specular.g = lights.at(i).color.g * (mtlcolor.specular * mtlcolor.specHighlight.g * pow(max((float)0, dotProduct(surfaceNormal, H)), mtlcolor.specExp));
-        specular.b = lights.at(i).color.b * (mtlcolor.specular * mtlcolor.specHighlight.b * pow(max((float)0, dotProduct(surfaceNormal, H)), mtlcolor.specExp));
+        specular.r = I * lights.at(i).color.r * (mtlcolor.specular * mtlcolor.specHighlight.r * pow(max((float)0, dotProduct(surfaceNormal, H)), mtlcolor.specExp));
+        specular.g = I * lights.at(i).color.g * (mtlcolor.specular * mtlcolor.specHighlight.g * pow(max((float)0, dotProduct(surfaceNormal, H)), mtlcolor.specExp));
+        specular.b = I * lights.at(i).color.b * (mtlcolor.specular * mtlcolor.specHighlight.b * pow(max((float)0, dotProduct(surfaceNormal, H)), mtlcolor.specExp));
 
         sum.r += shadow * (diffuse.r + specular.r);
         sum.g += shadow * (diffuse.g + specular.g);
@@ -485,8 +485,27 @@ Vector3 calTriangleSurfaceNormalSmooth(vector<Vector3> vertexNormals, Triangle t
     ret.x = (alpha * vertexNormals.at(triangle.vn1 - 1).x) + (beta * vertexNormals.at(triangle.vn2 - 1).x) + (radian * vertexNormals.at(triangle.vn3 - 1).x);
     ret.y = (alpha * vertexNormals.at(triangle.vn1 - 1).y) + (beta * vertexNormals.at(triangle.vn2 - 1).y) + (radian * vertexNormals.at(triangle.vn3 - 1).y);
     ret.z = (alpha * vertexNormals.at(triangle.vn1 - 1).z) + (beta * vertexNormals.at(triangle.vn2 - 1).z) + (radian * vertexNormals.at(triangle.vn3 - 1).z);
+    // ret.x = ((vertexNormals.at(triangle.vn1 - 1).x) + (vertexNormals.at(triangle.vn2 - 1).x) + (vertexNormals.at(triangle.vn3 - 1).x))/3;
+    // ret.y = ((vertexNormals.at(triangle.vn1 - 1).y) + (vertexNormals.at(triangle.vn2 - 1).y) + (vertexNormals.at(triangle.vn3 - 1).y))/3;
+    // ret.z = ((vertexNormals.at(triangle.vn1 - 1).z) + (vertexNormals.at(triangle.vn2 - 1).z) + (vertexNormals.at(triangle.vn3 - 1).z))/3;
     return normalizeVector(ret); 
 }
 
 
 
+// vn -0.447213590145111 0.000000000000000 -0.894427180290222
+// vn -0.298142403364182 0.000000000000000 -0.929618120193481
+// vn -0.447213590145111 0.000000000000000 -0.894427180290222
+// vn -0.149071201682091 0.000000000000000 -0.964809119701385
+// vn 0.149071201682091 0.000000000000000 -0.964809119701385
+// vn 0.298142403364182 0.000000000000000 -0.929618120193481
+// vn 0.447213590145111 0.000000000000000 -0.894427180290222
+// vn 0.447213590145111 0.000000000000000 -0.894427180290222
+
+// mtlcolor 0.0 1.0 1.0 0.0 1.0 0.0 0.2 0.4 0.8 10
+// f 8//1 9//2 10//3
+// f 8//1 11//4 9//2
+// f 11//4 12//5 9//2
+// f 11//4 13//6 12//5
+// f 13//6 14//7 12//5
+// f 13//6 15//8 14//7

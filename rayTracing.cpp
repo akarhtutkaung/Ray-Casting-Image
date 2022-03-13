@@ -102,8 +102,8 @@ int main(int argc, char **argv)
                 if (tTemp >= 0)
                 {
                     Vector3 rayIntersectionPoint = calRayIntersectObjPoint(rayDir, imgInfo.eye, tTemp);
-                    barycentricPoint = barycentricCalculation(triangle, rayIntersectionPoint);
-                    if (barycentricPoint.a <= 1 && barycentricPoint.a >= 0 && barycentricPoint.b <= 1 && barycentricPoint.b >= 0 && barycentricPoint.r <= 1 && barycentricPoint.r >= 0 && (barycentricPoint.a + barycentricPoint.b + barycentricPoint.r) <= 1.001 && (barycentricPoint.a + barycentricPoint.b + barycentricPoint.r) >= 0)
+                    Barycentric barycentricPointTemp = barycentricCalculation(triangle, rayIntersectionPoint);
+                    if (barycentricPointTemp.a <= 1 && barycentricPointTemp.a >= 0 && barycentricPointTemp.b <= 1 && barycentricPointTemp.b >= 0 && barycentricPointTemp.r <= 1 && barycentricPointTemp.r >= 0 && (barycentricPointTemp.a + barycentricPointTemp.b + barycentricPointTemp.r) <= 1.001 && (barycentricPointTemp.a + barycentricPointTemp.b + barycentricPointTemp.r) >= 0)
                     {
                         // point is inside the triangle
                         float triangleDis = calDistanceFromRayEqu(rayDir, imgInfo.eye, tTemp);
@@ -112,6 +112,7 @@ int main(int argc, char **argv)
                             minDis = triangleDis;
                             t = tTemp;
                             index = k;
+                            barycentricPoint = barycentricPointTemp;
                             shape = 't';
                         }
                     }
@@ -147,7 +148,6 @@ int main(int argc, char **argv)
                     if (triangle.smoothShading)
                     {
                         surfaceNormal = calTriangleSurfaceNormalSmooth(imgInfo.vertexNormals, triangle, barycentricPoint);
-                        
                     }
                     else
                     {
