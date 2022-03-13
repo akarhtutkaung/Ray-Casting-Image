@@ -336,7 +336,7 @@ RGB phongIllu(vector<Light> lights, vector<Sphere *> spheres, vector<Triangle> t
     sum.r = 0.0f;
     sum.b = 0.0f;
     sum.g = 0.0f;
-    float I = 1.0f / (float)lights.size();
+    // float I = 1.0f / (float)lights.size();
     float lightPosDis = INFINITY;
     for (int i = 0; i < lights.size(); i++)
     {
@@ -363,9 +363,9 @@ RGB phongIllu(vector<Light> lights, vector<Sphere *> spheres, vector<Triangle> t
         diffuse.g = (mtlcolor.diffuse * objDif.g * max((float)0, dotProduct(surfaceNormal, L)));
         diffuse.b = (mtlcolor.diffuse * objDif.b * max((float)0, dotProduct(surfaceNormal, L)));
 
-        specular.r = I * lights.at(i).color.r * (mtlcolor.specular * mtlcolor.specHighlight.r * pow(max((float)0, dotProduct(surfaceNormal, H)), mtlcolor.specExp));
-        specular.g = I * lights.at(i).color.g * (mtlcolor.specular * mtlcolor.specHighlight.g * pow(max((float)0, dotProduct(surfaceNormal, H)), mtlcolor.specExp));
-        specular.b = I * lights.at(i).color.b * (mtlcolor.specular * mtlcolor.specHighlight.b * pow(max((float)0, dotProduct(surfaceNormal, H)), mtlcolor.specExp));
+        specular.r = lights.at(i).color.r * (mtlcolor.specular * mtlcolor.specHighlight.r * pow(max((float)0, dotProduct(surfaceNormal, H)), mtlcolor.specExp));
+        specular.g = lights.at(i).color.g * (mtlcolor.specular * mtlcolor.specHighlight.g * pow(max((float)0, dotProduct(surfaceNormal, H)), mtlcolor.specExp));
+        specular.b = lights.at(i).color.b * (mtlcolor.specular * mtlcolor.specHighlight.b * pow(max((float)0, dotProduct(surfaceNormal, H)), mtlcolor.specExp));
 
         sum.r += shadow * (diffuse.r + specular.r);
         sum.g += shadow * (diffuse.g + specular.g);
