@@ -329,7 +329,7 @@ RGB calTriangleTextureCoordinate(Triangle triangle, Barycentric baryCentric, Tex
     return texture->textures.at(j).at(i);
 }
 
-RGB phongIllu(vector<Light> lights, vector<Sphere *> spheres, vector<Triangle> triangles, MTLcolor mtlcolor, Texture *texture, Vector3 surfaceNormal, Vector3 intersectCoor, Vector3 viewDir, int curIndex, char shape, RGB objDif)
+RGB phongIllu(Vector3 origin, vector<Light> lights, vector<Sphere *> spheres, vector<Triangle> triangles, MTLcolor mtlcolor, Texture *texture, Vector3 surfaceNormal, Vector3 intersectCoor, Vector3 viewDir, int curIndex, char shape, RGB objDif)
 {
     Vector3 L, H;
     RGB sum;
@@ -338,6 +338,7 @@ RGB phongIllu(vector<Light> lights, vector<Sphere *> spheres, vector<Triangle> t
     sum.g = 0.0f;
     // float I = 1.0f / (float)lights.size();
     float lightPosDis = INFINITY;
+
     for (int i = 0; i < lights.size(); i++)
     {
         if (lights.at(i).choice == 1.0)
@@ -370,14 +371,12 @@ RGB phongIllu(vector<Light> lights, vector<Sphere *> spheres, vector<Triangle> t
         sum.r += shadow * (diffuse.r + specular.r);
         sum.g += shadow * (diffuse.g + specular.g);
         sum.b += shadow * (diffuse.b + specular.b);
-        // sum.r += specular.r;
-        // sum.g += specular.g;
-        // sum.b += specular.b;
-        // sum.r += diffuse.r;
-        // sum.g += diffuse.g;
-        // sum.b += diffuse.b;
     }
-    // return sum;
+
+    Vector3 incidenceRay = calIncidenceRay(origin,intersectCoor);
+    Vector3 specularReflection = calSpecularReflection(surfaceNormal, incidenceRay);
+    float fresnelReflectance = calFresnelReflectance(surfaceNormal, incidenceRay, mtlcolor.refractionIndex);
+
     RGB ret;
     ret.r = (mtlcolor.ambient * objDif.r) + sum.r;
     ret.g = (mtlcolor.ambient * objDif.g) + sum.g;
@@ -488,24 +487,40 @@ Vector3 calTriangleSurfaceNormalSmooth(vector<Vector3> vertexNormals, Triangle t
     // ret.x = ((vertexNormals.at(triangle.vn1 - 1).x) + (vertexNormals.at(triangle.vn2 - 1).x) + (vertexNormals.at(triangle.vn3 - 1).x))/3;
     // ret.y = ((vertexNormals.at(triangle.vn1 - 1).y) + (vertexNormals.at(triangle.vn2 - 1).y) + (vertexNormals.at(triangle.vn3 - 1).y))/3;
     // ret.z = ((vertexNormals.at(triangle.vn1 - 1).z) + (vertexNormals.at(triangle.vn2 - 1).z) + (vertexNormals.at(triangle.vn3 - 1).z))/3;
-    return normalizeVector(ret); 
+    return normalizeVector(ret);
 }
 
+float calFresnelInitial(float refrectionIndex)
+{
+    return pow((refrectionIndex - 1) / (refrectionIndex + 1), 2);
+}
 
+float calFresnelReflectance(Vector3 normalVec, Vector3 incidenceRay, float refrectionIndex)
+{
+    float fresnelInitial = calFresnelInitial(refrectionIndex);
+    if (fresnelInitial == 1.0)
+    {
+        return fresnelInitial;
+    }
+    float fresnelReflectance = fresnelInitial + (1.0 - fresnelInitial) * pow(1.0 - (dotProduct(normalVec, incidenceRay)), 5);
+    return fresnelReflectance;
+}
 
-// vn -0.447213590145111 0.000000000000000 -0.894427180290222
-// vn -0.298142403364182 0.000000000000000 -0.929618120193481
-// vn -0.447213590145111 0.000000000000000 -0.894427180290222
-// vn -0.149071201682091 0.000000000000000 -0.964809119701385
-// vn 0.149071201682091 0.000000000000000 -0.964809119701385
-// vn 0.298142403364182 0.000000000000000 -0.929618120193481
-// vn 0.447213590145111 0.000000000000000 -0.894427180290222
-// vn 0.447213590145111 0.000000000000000 -0.894427180290222
+Vector3 calSpecularReflection(Vector3 normalVec, Vector3 incidenceRay)
+{
+    float angleOfIncidence = dotProduct(normalVec, incidenceRay);
+    Vector3 specularReflection;
+    specularReflection.x = 2.0 * angleOfIncidence * normalVec.x - incidenceRay.x;
+    specularReflection.y = 2.0 * angleOfIncidence * normalVec.y - incidenceRay.y;
+    specularReflection.z = 2.0 * angleOfIncidence * normalVec.z - incidenceRay.z;
+    return specularReflection;
+}
 
-// mtlcolor 0.0 1.0 1.0 0.0 1.0 0.0 0.2 0.4 0.8 10
-// f 8//1 9//2 10//3
-// f 8//1 11//4 9//2
-// f 11//4 12//5 9//2
-// f 11//4 13//6 12//5
-// f 13//6 14//7 12//5
-// f 13//6 15//8 14//7
+Vector3 calIncidenceRay(Vector3 origin, Vector3 intersection)
+{
+    Vector3 incidenceRay;
+    incidenceRay.x = intersection.x - origin.x;
+    incidenceRay.y = intersection.y - origin.y;
+    incidenceRay.z = intersection.z - origin.z;
+    return normalizeVector(incidenceRay);
+}

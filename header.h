@@ -54,6 +54,8 @@ typedef struct
     float diffuse;
     float specular;
     float specExp;
+    float opacity;
+    float refractionIndex;
 } MTLcolor;
 
 typedef struct
@@ -78,7 +80,9 @@ typedef struct
     Vector3 v1;
     Vector3 v2;
     Vector3 v3;
-    int v1Index; int v2Index; int v3Index;
+    int v1Index;
+    int v2Index;
+    int v3Index;
     int vn1;
     int vn2;
     int vn3;
@@ -109,7 +113,8 @@ typedef struct
     Vector3 calculatedVec;
 } Light;
 
-typedef struct{
+typedef struct
+{
     float u;
     float v;
 } TextureCoordinate;
@@ -123,7 +128,7 @@ typedef struct
     Size imgSize;      // size of output image (pixel)
     RGB bkgcolor;      // background color
     MTLcolor mtlcolor; // material color
-    vector<Sphere*> spheres;
+    vector<Sphere *> spheres;
     vector<Vector3> vertices;
     vector<Vector3> vertexNormals;
     vector<TextureCoordinate> vertexTextureCoordinates;
@@ -156,14 +161,18 @@ Vector3 calSphereSurfaceNormal(Vector3 intersect, Sphere *sphere);
 Vector3 calTriangleSurfaceNormal(Triangle triangle);
 Vector3 calLDir(Light light);
 Vector3 calH(Vector3 L, Vector3 viewDir);
-RGB phongIllu(vector<Light> lights, vector<Sphere*> spheres, vector<Triangle> triangles, MTLcolor mtlcolor, Texture *texture, Vector3 surfaceNormal, Vector3 intersectCoor, Vector3 viewDir, int curIndex, char shape, RGB objDif);
+RGB phongIllu(Vector3 origin, vector<Light> lights, vector<Sphere *> spheres, vector<Triangle> triangles, MTLcolor mtlcolor, Texture *texture, Vector3 surfaceNormal, Vector3 intersectCoor, Vector3 viewDir, int curIndex, char shape, RGB objDif);
 Vector3 calRayIntersectObjPoint(Vector3 rayDir, Vector3 rayOrigin, float t);
 float calDistanceFromRayEqu(Vector3 rayDir, Vector3 rayOrigin, float t);
 float calTDistanceFromTriangle(Vector3 rayDir, Vector3 rayOrigin, Triangle triangle);
 Barycentric barycentricCalculation(Triangle triangle, Vector3 p);
 Vector3 calTriangleSurfaceNormalSmooth(vector<Vector3> vertexNormals, Triangle triangle, Barycentric barycentricPoint);
 RGB calSphereTextureCoordinate(Vector3 surfaceNormal, Texture *texture);
-RGB calTriangleTextureCoordinate(Triangle triangle, Barycentric baryCentric, Texture *texture, vector <TextureCoordinate> textureCoordinate);
+RGB calTriangleTextureCoordinate(Triangle triangle, Barycentric baryCentric, Texture *texture, vector<TextureCoordinate> textureCoordinate);
+float calFresnelInitial(float refrectionIndex);
+float calFresnelReflectance(Vector3 normalVec, Vector3 incidenceRay, float refrectionIndex);
+Vector3 calSpecularReflection(Vector3 normalVec, Vector3 incidenceRay);
+Vector3 calIncidenceRay(Vector3 origin, Vector3 intersection);
 
 // storeData.cpp
 void checkData(Info *imgInfo, string line);

@@ -249,6 +249,8 @@ void storeMtlColor(Info *imgInfo, vector<string> words)
     imgInfo->mtlcolor.diffuse = (stof(words.at(8)));
     imgInfo->mtlcolor.specular = (stof(words.at(9)));
     imgInfo->mtlcolor.specExp = (stof(words.at(10)));
+    imgInfo->mtlcolor.opacity = (stof(words.at(11)));
+    imgInfo->mtlcolor.refractionIndex = (stof(words.at(12)));
 }
 
 void storeSphere(Info *imgInfo, vector<string> words)

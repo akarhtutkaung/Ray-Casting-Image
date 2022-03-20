@@ -139,7 +139,7 @@ int main(int argc, char **argv)
                     {
                         objDif = sphere->mtlcolor.objDif;
                     }
-                    final = phongIllu(imgInfo.lights, imgInfo.spheres, imgInfo.triangles, sphere->mtlcolor, sphere->texture, surfaceNormal, rayIntersectionPoint, imgInfo.viewDir, index, 's', objDif);
+                    final = phongIllu(imgInfo.eye, imgInfo.lights, imgInfo.spheres, imgInfo.triangles, sphere->mtlcolor, sphere->texture, surfaceNormal, rayIntersectionPoint, imgInfo.viewDir, index, 's', objDif);
                 }
                 else if (shape == 't')
                 {
@@ -167,7 +167,7 @@ int main(int argc, char **argv)
                         objDif = triangle.mtlcolor.objDif;
                     }
 
-                    final = phongIllu(imgInfo.lights, imgInfo.spheres, imgInfo.triangles, triangle.mtlcolor, triangle.texture, surfaceNormal, rayIntersectionPoint, imgInfo.viewDir, index, 't', objDif);
+                    final = phongIllu(imgInfo.eye, imgInfo.lights, imgInfo.spheres, imgInfo.triangles, triangle.mtlcolor, triangle.texture, surfaceNormal, rayIntersectionPoint, imgInfo.viewDir, index, 't', objDif);
                 }
                 imgColorData[i][j][0] = convertColor(final.r);
                 imgColorData[i][j][1] = convertColor(final.g);
