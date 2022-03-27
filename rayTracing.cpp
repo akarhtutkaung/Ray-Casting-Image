@@ -39,34 +39,6 @@ int main(int argc, char **argv)
     imgInfo.viewWindow.ll = calViewCoordinate("ll", eye, u, v, DISTANCE, n, width, height);
     imgInfo.viewWindow.lr = calViewCoordinate("lr", eye, u, v, DISTANCE, n, width, height);
 
-    // // Calculate all the triangle's surface normal
-    // for (int i = 0; i < imgInfo.triangles.size(); i++)
-    // {
-    //     imgInfo.triangles.at(i).surfaceNormal = calTriangleSurfaceNormal(imgInfo.triangles.at(i));
-    // }
-    // for (int currentIndex = 0; currentIndex < imgInfo.vertices.size(); currentIndex++)
-    // {
-    //     int totalTriangles = 0;
-    //     float x = 0, y = 0, z = 0;
-    //     for (int j = 0; j < imgInfo.triangles.size(); j++)
-    //     {
-    //         Triangle triangle = imgInfo.triangles.at(j);
-    //         if (triangle.v1Index == currentIndex || triangle.v2Index == currentIndex || triangle.v3Index == currentIndex)
-    //         {
-    //             x += triangle.surfaceNormal.x;
-    //             y += triangle.surfaceNormal.y;
-    //             z += triangle.surfaceNormal.z;
-    //             totalTriangles++;
-    //         }
-    //     }
-    //     Vector3 vertexNormal;
-    //     vertexNormal.x = x / float(totalTriangles);
-    //     vertexNormal.y = y / float(totalTriangles);
-    //     vertexNormal.z = z / float(totalTriangles);
-    //     printf("vertex [%d] Normal: %.15f, %.15f, %.15f\n", currentIndex+1, vertexNormal.x, vertexNormal.y, vertexNormal.z);
-    // }
-    
-
     for (int i = 0; i < heightPixel; i++)
     {
         for (int j = 0; j < widthPixel; j++)
@@ -139,7 +111,7 @@ int main(int argc, char **argv)
                     {
                         objDif = sphere->mtlcolor.objDif;
                     }
-                    final = phongIllu(imgInfo.eye, imgInfo.lights, imgInfo.spheres, imgInfo.triangles, sphere->mtlcolor, sphere->texture, surfaceNormal, rayIntersectionPoint, imgInfo.viewDir, index, 's', objDif);
+                    final = phongIllu(imgInfo.eye, imgInfo.lights, imgInfo.spheres, imgInfo.triangles, sphere->mtlcolor, sphere->texture, surfaceNormal, rayIntersectionPoint, imgInfo.viewDir, index, 's', objDif, imgInfo);
                 }
                 else if (shape == 't')
                 {
@@ -167,7 +139,7 @@ int main(int argc, char **argv)
                         objDif = triangle.mtlcolor.objDif;
                     }
 
-                    final = phongIllu(imgInfo.eye, imgInfo.lights, imgInfo.spheres, imgInfo.triangles, triangle.mtlcolor, triangle.texture, surfaceNormal, rayIntersectionPoint, imgInfo.viewDir, index, 't', objDif);
+                    final = phongIllu(imgInfo.eye, imgInfo.lights, imgInfo.spheres, imgInfo.triangles, triangle.mtlcolor, triangle.texture, surfaceNormal, rayIntersectionPoint, imgInfo.viewDir, index, 't', objDif, imgInfo);
                 }
                 imgColorData[i][j][0] = convertColor(final.r);
                 imgColorData[i][j][1] = convertColor(final.g);
@@ -192,5 +164,23 @@ int main(int argc, char **argv)
         }
     }
     output_stream.close();
+
+    Vector3 surfaceNormal;
+    Vector3 originPoint;
+    Vector3 intersectPoint;
+    originPoint.x = 2; originPoint.y = 3; originPoint.z = 5;
+    intersectPoint.x = 3; intersectPoint.y = -1; intersectPoint.z = -3;
+    surfaceNormal.x = 0; surfaceNormal.y = 1; surfaceNormal.z = 0;
+
+
+
+    Vector3 incidenceRay = calIncidenceRay(originPoint, intersectPoint);
+    printf("incidence ray: %f, %f, %f\n", incidenceRay.x, incidenceRay.y, incidenceRay.z);
+
+    Vector3 refrection = calSpecularReflection(surfaceNormal, incidenceRay);
+    printf("specularRefrection: %f, %f, %f\n", refrection.x,refrection.y,refrection.z);
+
+    Vector3 transmittedRay = calTransmittedRay(1,1.2,surfaceNormal, incidenceRay);
+    printf("transmittedRay: %f, %f, %f\n", transmittedRay.x, transmittedRay.y, transmittedRay.z);
     return 0;
 }

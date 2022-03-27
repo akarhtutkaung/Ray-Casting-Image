@@ -10,6 +10,7 @@
 #include <sstream>
 #define PI 3.14159265
 #define DISTANCE 30
+#define AIR 1
 using namespace std;
 
 typedef struct
@@ -161,7 +162,7 @@ Vector3 calSphereSurfaceNormal(Vector3 intersect, Sphere *sphere);
 Vector3 calTriangleSurfaceNormal(Triangle triangle);
 Vector3 calLDir(Light light);
 Vector3 calH(Vector3 L, Vector3 viewDir);
-RGB phongIllu(Vector3 origin, vector<Light> lights, vector<Sphere *> spheres, vector<Triangle> triangles, MTLcolor mtlcolor, Texture *texture, Vector3 surfaceNormal, Vector3 intersectCoor, Vector3 viewDir, int curIndex, char shape, RGB objDif);
+RGB phongIllu(Vector3 origin, vector<Light> lights, vector<Sphere *> spheres, vector<Triangle> triangles, MTLcolor mtlcolor, Texture *texture, Vector3 surfaceNormal, Vector3 intersectCoor, Vector3 viewDir, int curIndex, char shape, RGB objDif, Info imgInfo);
 Vector3 calRayIntersectObjPoint(Vector3 rayDir, Vector3 rayOrigin, float t);
 float calDistanceFromRayEqu(Vector3 rayDir, Vector3 rayOrigin, float t);
 float calTDistanceFromTriangle(Vector3 rayDir, Vector3 rayOrigin, Triangle triangle);
@@ -173,7 +174,8 @@ float calFresnelInitial(float refrectionIndex);
 float calFresnelReflectance(Vector3 normalVec, Vector3 incidenceRay, float refrectionIndex);
 Vector3 calSpecularReflection(Vector3 normalVec, Vector3 incidenceRay);
 Vector3 calIncidenceRay(Vector3 origin, Vector3 intersection);
-
+Vector3 calTransmittedRay(float originalRefrInd, float mtlRefrInd, Vector3 surfaceNormal, Vector3 incidenceRay);
+RGB traceColor(vector<Sphere *> spheres, vector<Triangle> triangles, Vector3 rayOrigin, Vector3 rayDir, int curIndex, char shape, Info imgInfo);
 // storeData.cpp
 void checkData(Info *imgInfo, string line);
 Info readInfo(string fileName);
