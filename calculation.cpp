@@ -189,10 +189,10 @@ Vector3 calSphereSurfaceNormal(Vector3 intersect, Sphere *sphere)
     return normalizeVector(N);
 }
 
-Vector3 calTriangleSurfaceNormal(Triangle triangle)
+Vector3 calTriangleSurfaceNormal(Triangle *triangle)
 {
     Vector3 e1, e2;
-    Vector3 p0 = triangle.v1, p1 = triangle.v2, p2 = triangle.v3;
+    Vector3 p0 = triangle->v1, p1 = triangle->v2, p2 = triangle->v3;
 
     e1.x = p1.x - p0.x;
     e1.y = p1.y - p0.y;
@@ -250,7 +250,7 @@ Vector3 calH(Vector3 L, Vector3 viewDir)
     return normalizeVector(temp);
 }
 
-float checkShadow(vector<Sphere *> spheres, vector<Triangle> triangles, Vector3 L, float lightPosDis, Vector3 intersectCoor, int curIndex, char shape)
+float checkShadow(vector<Sphere *> spheres, vector<Triangle *> triangles, Vector3 L, float lightPosDis, Vector3 intersectCoor, int curIndex, char shape)
 {
     float shadow = 1.0; // nothing is blocking initially
 
@@ -278,7 +278,7 @@ float checkShadow(vector<Sphere *> spheres, vector<Triangle> triangles, Vector3 
         {
             continue;
         }
-        Triangle triangle = triangles.at(i);
+        Triangle *triangle = triangles.at(i);
         float t = calTDistanceFromTriangle(L, intersectCoor, triangles.at(i));
         if (t > 0)
         {
@@ -316,20 +316,20 @@ RGB calSphereTextureCoordinate(Vector3 surfaceNormal, Texture *texture)
     return texture->textures.at(j).at(i);
 }
 
-RGB calTriangleTextureCoordinate(Triangle triangle, Barycentric baryCentric, Texture *texture, vector<TextureCoordinate> textureCoordinate)
+RGB calTriangleTextureCoordinate(Triangle *triangle, Barycentric baryCentric, Texture *texture, vector<TextureCoordinate> textureCoordinate)
 {
     TextureCoordinate res;
     float alpha = baryCentric.a;
     float beta = baryCentric.b;
     float radian = baryCentric.r;
-    res.u = alpha * textureCoordinate.at(triangle.vt1 - 1).u + beta * textureCoordinate.at(triangle.vt2 - 1).u + radian * textureCoordinate.at(triangle.vt3 - 1).u;
-    res.v = alpha * textureCoordinate.at(triangle.vt1 - 1).v + beta * textureCoordinate.at(triangle.vt2 - 1).v + radian * textureCoordinate.at(triangle.vt3 - 1).v;
+    res.u = alpha * textureCoordinate.at(triangle->vt1 - 1).u + beta * textureCoordinate.at(triangle->vt2 - 1).u + radian * textureCoordinate.at(triangle->vt3 - 1).u;
+    res.v = alpha * textureCoordinate.at(triangle->vt1 - 1).v + beta * textureCoordinate.at(triangle->vt2 - 1).v + radian * textureCoordinate.at(triangle->vt3 - 1).v;
     int i = round(res.u * float(texture->width - 1));
     int j = round(res.v * float(texture->height - 1));
     return texture->textures.at(j).at(i);
 }
 
-RGB phongIllu(Vector3 origin, vector<Light> lights, vector<Sphere *> spheres, vector<Triangle> triangles, MTLcolor mtlcolor, Texture *texture, Vector3 surfaceNormal, Vector3 intersectCoor, Vector3 viewDir, int curIndex, char shape, RGB objDif, Info imgInfo)
+RGB phongIllu(Vector3 origin, vector<Light> lights, vector<Sphere *> spheres, vector<Triangle *> triangles, MTLcolor mtlcolor, Texture *texture, Vector3 surfaceNormal, Vector3 intersectCoor, Vector3 viewDir, int curIndex, char shape, RGB objDif, Info imgInfo)
 {
     Vector3 L, H;
     RGB sum;
@@ -384,12 +384,21 @@ RGB phongIllu(Vector3 origin, vector<Light> lights, vector<Sphere *> spheres, ve
     RGB tracedColorRefraction = traceColor(spheres, triangles, intersectCoor, transmittedRay, curIndex, shape, imgInfo);
     // printf("refr: %f, %f, %f\n", tracedColorRefraction.r, tracedColorRefraction.g, tracedColorRefraction.b);
     RGB ret;
-    ret.r = (mtlcolor.ambient * objDif.r) + sum.r + (fresnelReflectance * tracedColorReflection.r) + (1.0-fresnelReflectance)*(1.0-mtlcolor.opacity)*tracedColorRefraction.r;
-    ret.g = (mtlcolor.ambient * objDif.g) + sum.g + (fresnelReflectance * tracedColorReflection.g) + (1.0-fresnelReflectance)*(1.0-mtlcolor.opacity)*tracedColorRefraction.g;
-    ret.b = (mtlcolor.ambient * objDif.b) + sum.b + (fresnelReflectance * tracedColorReflection.b) + (1.0-fresnelReflectance)*(1.0-mtlcolor.opacity)*tracedColorRefraction.b;
+    ret.r = (mtlcolor.ambient * objDif.r) + sum.r + (fresnelReflectance * tracedColorReflection.r) + (1.0 - fresnelReflectance) * (1.0 - mtlcolor.opacity) * tracedColorRefraction.r;
+    ret.g = (mtlcolor.ambient * objDif.g) + sum.g + (fresnelReflectance * tracedColorReflection.g) + (1.0 - fresnelReflectance) * (1.0 - mtlcolor.opacity) * tracedColorRefraction.g;
+    ret.b = (mtlcolor.ambient * objDif.b) + sum.b + (fresnelReflectance * tracedColorReflection.b) + (1.0 - fresnelReflectance) * (1.0 - mtlcolor.opacity) * tracedColorRefraction.b;
+
     // ret.r = (mtlcolor.ambient * objDif.r) + sum.r + (fresnelReflectance * tracedColorReflection.r);
     // ret.g = (mtlcolor.ambient * objDif.g) + sum.g + (fresnelReflectance * tracedColorReflection.g);
     // ret.b = (mtlcolor.ambient * objDif.b) + sum.b + (fresnelReflectance * tracedColorReflection.b);
+
+    // ret.r = (mtlcolor.ambient * objDif.r) + sum.r;
+    // ret.g = (mtlcolor.ambient * objDif.g) + sum.g;
+    // ret.b = (mtlcolor.ambient * objDif.b) + sum.b;
+
+    // ret.r = (mtlcolor.ambient * objDif.r) + sum.r + (1.0 - fresnelReflectance) * (1.0 - mtlcolor.opacity) * tracedColorRefraction.r;
+    // ret.g = (mtlcolor.ambient * objDif.g) + sum.g + (1.0 - fresnelReflectance) * (1.0 - mtlcolor.opacity) * tracedColorRefraction.g;
+    // ret.b = (mtlcolor.ambient * objDif.b) + sum.b + (1.0 - fresnelReflectance) * (1.0 - mtlcolor.opacity) * tracedColorRefraction.b;
     return ret;
 }
 
@@ -402,11 +411,11 @@ Vector3 calRayIntersectObjPoint(Vector3 rayDir, Vector3 rayOrigin, float t)
     return intersectPoint;
 }
 
-float calTDistanceFromTriangle(Vector3 rayDir, Vector3 rayOrigin, Triangle triangle)
+float calTDistanceFromTriangle(Vector3 rayDir, Vector3 rayOrigin, Triangle *triangle)
 {
     Vector3 e1, e2, n;
     float D, t = -1;
-    Vector3 p0 = triangle.v1, p1 = triangle.v2, p2 = triangle.v3;
+    Vector3 p0 = triangle->v1, p1 = triangle->v2, p2 = triangle->v3;
 
     e1.x = p1.x - p0.x;
     e1.y = p1.y - p0.y;
@@ -448,10 +457,10 @@ float calTDistanceFromTriangle(Vector3 rayDir, Vector3 rayOrigin, Triangle trian
     }
 }
 
-Barycentric barycentricCalculation(Triangle triangle, Vector3 p)
+Barycentric barycentricCalculation(Triangle *triangle, Vector3 p)
 {
     Vector3 e1, e2, e3, e4;
-    Vector3 p0 = triangle.v1, p1 = triangle.v2, p2 = triangle.v3;
+    Vector3 p0 = triangle->v1, p1 = triangle->v2, p2 = triangle->v3;
 
     e1.x = p1.x - p0.x;
     e1.y = p1.y - p0.y;
@@ -484,15 +493,15 @@ Barycentric barycentricCalculation(Triangle triangle, Vector3 p)
     return ret;
 }
 
-Vector3 calTriangleSurfaceNormalSmooth(vector<Vector3> vertexNormals, Triangle triangle, Barycentric barycentricPoint)
+Vector3 calTriangleSurfaceNormalSmooth(vector<Vector3> vertexNormals, Triangle *triangle, Barycentric barycentricPoint)
 {
     Vector3 ret;
     float alpha = barycentricPoint.a;
     float beta = barycentricPoint.b;
     float radian = barycentricPoint.r;
-    ret.x = (alpha * vertexNormals.at(triangle.vn1 - 1).x) + (beta * vertexNormals.at(triangle.vn2 - 1).x) + (radian * vertexNormals.at(triangle.vn3 - 1).x);
-    ret.y = (alpha * vertexNormals.at(triangle.vn1 - 1).y) + (beta * vertexNormals.at(triangle.vn2 - 1).y) + (radian * vertexNormals.at(triangle.vn3 - 1).y);
-    ret.z = (alpha * vertexNormals.at(triangle.vn1 - 1).z) + (beta * vertexNormals.at(triangle.vn2 - 1).z) + (radian * vertexNormals.at(triangle.vn3 - 1).z);
+    ret.x = (alpha * vertexNormals.at(triangle->vn1 - 1).x) + (beta * vertexNormals.at(triangle->vn2 - 1).x) + (radian * vertexNormals.at(triangle->vn3 - 1).x);
+    ret.y = (alpha * vertexNormals.at(triangle->vn1 - 1).y) + (beta * vertexNormals.at(triangle->vn2 - 1).y) + (radian * vertexNormals.at(triangle->vn3 - 1).y);
+    ret.z = (alpha * vertexNormals.at(triangle->vn1 - 1).z) + (beta * vertexNormals.at(triangle->vn2 - 1).z) + (radian * vertexNormals.at(triangle->vn3 - 1).z);
     // ret.x = ((vertexNormals.at(triangle.vn1 - 1).x) + (vertexNormals.at(triangle.vn2 - 1).x) + (vertexNormals.at(triangle.vn3 - 1).x))/3;
     // ret.y = ((vertexNormals.at(triangle.vn1 - 1).y) + (vertexNormals.at(triangle.vn2 - 1).y) + (vertexNormals.at(triangle.vn3 - 1).y))/3;
     // ret.z = ((vertexNormals.at(triangle.vn1 - 1).z) + (vertexNormals.at(triangle.vn2 - 1).z) + (vertexNormals.at(triangle.vn3 - 1).z))/3;
@@ -542,7 +551,7 @@ Vector3 calTransmittedRay(float originalRefrInd, float mtlRefrInd, Vector3 surfa
     transmittedRay.z = (sqrt(1 - ((pow(originalRefrInd / mtlRefrInd, 2) * (1 - (pow(dotProduct(surfaceNormal, incidenceRay), 2))))))) * -surfaceNormal.z + ((originalRefrInd / mtlRefrInd) * (dotProduct(surfaceNormal, incidenceRay) * surfaceNormal.z - incidenceRay.z));
     return transmittedRay;
 }
-RGB traceColor(vector<Sphere *> spheres, vector<Triangle> triangles, Vector3 rayOrigin, Vector3 rayDir, int curIndex, char shape, Info imgInfo)
+RGB traceColor(vector<Sphere *> spheres, vector<Triangle *> triangles, Vector3 rayOrigin, Vector3 rayDir, int curIndex, char shape, Info imgInfo)
 {
     float minDis = INFINITY, t, index;
     char nearestObjShape = 'z';
@@ -573,7 +582,7 @@ RGB traceColor(vector<Sphere *> spheres, vector<Triangle> triangles, Vector3 ray
         {
             continue;
         }
-        Triangle triangle = triangles.at(i);
+        Triangle *triangle = triangles.at(i);
         float tTemp = calTDistanceFromTriangle(rayDir, rayOrigin, triangle);
         if (tTemp >= 0)
         {
@@ -622,9 +631,9 @@ RGB traceColor(vector<Sphere *> spheres, vector<Triangle> triangles, Vector3 ray
         }
         else if (nearestObjShape == 't')
         {
-            Triangle triangle = triangles.at(index);
+            Triangle *triangle = triangles.at(index);
             Vector3 surfaceNormal;
-            if (triangle.smoothShading)
+            if (triangle->smoothShading)
             {
                 surfaceNormal = calTriangleSurfaceNormalSmooth(imgInfo.vertexNormals, triangle, barycentricPoint);
             }
@@ -634,16 +643,16 @@ RGB traceColor(vector<Sphere *> spheres, vector<Triangle> triangles, Vector3 ray
             }
 
             RGB objDif;
-            if (triangle.textureApplied)
+            if (triangle->textureApplied)
             {
-                RGB originalFormat = calTriangleTextureCoordinate(triangle, barycentricPoint, triangle.texture, imgInfo.vertexTextureCoordinates);
+                RGB originalFormat = calTriangleTextureCoordinate(triangle, barycentricPoint, triangle->texture, imgInfo.vertexTextureCoordinates);
                 objDif.r = originalFormat.r / 255.0;
                 objDif.g = originalFormat.g / 255.0;
                 objDif.b = originalFormat.b / 255.0;
             }
             else
             {
-                objDif = triangle.mtlcolor.objDif;
+                objDif = triangle->mtlcolor.objDif;
             }
 
             // final = phongIllu(rayOrigin, lights, spheres, triangles, triangle.mtlcolor, triangle.texture, surfaceNormal, rayIntersectionPoint, rayDir, index, 't', objDif, imgInfo);

@@ -69,7 +69,7 @@ int main(int argc, char **argv)
             }
             for (int k = 0; k < imgInfo.triangles.size(); k++)
             {
-                Triangle triangle = imgInfo.triangles.at(k);
+                Triangle *triangle = imgInfo.triangles.at(k);
                 float tTemp = calTDistanceFromTriangle(rayDir, imgInfo.eye, triangle);
                 if (tTemp >= 0)
                 {
@@ -115,9 +115,9 @@ int main(int argc, char **argv)
                 }
                 else if (shape == 't')
                 {
-                    Triangle triangle = imgInfo.triangles.at(index);
+                    Triangle *triangle = imgInfo.triangles.at(index);
                     Vector3 surfaceNormal;
-                    if (triangle.smoothShading)
+                    if (triangle->smoothShading)
                     {
                         surfaceNormal = calTriangleSurfaceNormalSmooth(imgInfo.vertexNormals, triangle, barycentricPoint);
                     }
@@ -127,19 +127,19 @@ int main(int argc, char **argv)
                     }
 
                     RGB objDif;
-                    if (triangle.textureApplied)
+                    if (triangle->textureApplied)
                     {
-                        RGB originalFormat = calTriangleTextureCoordinate(triangle, barycentricPoint, triangle.texture, imgInfo.vertexTextureCoordinates);
+                        RGB originalFormat = calTriangleTextureCoordinate(triangle, barycentricPoint, triangle->texture, imgInfo.vertexTextureCoordinates);
                         objDif.r = originalFormat.r / 255.0;
                         objDif.g = originalFormat.g / 255.0;
                         objDif.b = originalFormat.b / 255.0;
                     }
                     else
                     {
-                        objDif = triangle.mtlcolor.objDif;
+                        objDif = triangle->mtlcolor.objDif;
                     }
 
-                    final = phongIllu(imgInfo.eye, imgInfo.lights, imgInfo.spheres, imgInfo.triangles, triangle.mtlcolor, triangle.texture, surfaceNormal, rayIntersectionPoint, imgInfo.viewDir, index, 't', objDif, imgInfo);
+                    final = phongIllu(imgInfo.eye, imgInfo.lights, imgInfo.spheres, imgInfo.triangles, triangle->mtlcolor, triangle->texture, surfaceNormal, rayIntersectionPoint, imgInfo.viewDir, index, 't', objDif, imgInfo);
                 }
                 imgColorData[i][j][0] = convertColor(final.r);
                 imgColorData[i][j][1] = convertColor(final.g);
