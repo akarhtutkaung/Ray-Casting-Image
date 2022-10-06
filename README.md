@@ -1,4 +1,4 @@
-# Ray Casting
+# Ray Casting Image
 
 @Author: Akar (Ace) Htut Kaung
 
