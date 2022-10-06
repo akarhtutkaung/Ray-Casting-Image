@@ -24,11 +24,19 @@ make all
 ./raytracer [config file] [output filename]
 ```
 ## Showcase
-Example1
 
-Example2
+### Example 1
 
-Example3
+<img src="example_images/pic1.jpg" width="40%" />
+
+
+### Example 2
+
+<img src="example_images/pic2.jpg" width="40%" />
+
+### Example 3
+
+<img src="example_images/pic3.jpg" width="40%" />
 
 ## Config File
 What should be in the config file?
