@@ -14,6 +14,7 @@ This program use ray casting to determine the appropriate color to write in each
 
 ## Usage
 Inside the src/ folder:
+
 ### Compile
 ```
 make all
@@ -22,6 +23,13 @@ make all
 ```
 ./raytracer [config file] [output filename]
 ```
+## Showcase
+Example1
+
+Example2
+
+Example3
+
 ## Config File
 What should be in the config file?
 
